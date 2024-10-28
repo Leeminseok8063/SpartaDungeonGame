@@ -24,13 +24,22 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Look",
-                    "type": "Value",
-                    "id": "8fa6ed72-c0e2-4578-90bb-bded3be2b54b",
-                    "expectedControlType": "Delta",
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "1548e673-4062-4429-9c76-8516ded7c737",
+                    "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": true
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Attack",
+                    "type": "Button",
+                    "id": "300a30d9-89ec-4882-8d24-3163adafb94d",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -102,12 +111,23 @@
                 },
                 {
                     "name": "",
-                    "id": "bf899ea1-634d-4903-a5ec-c034e17036b9",
-                    "path": "<Mouse>/delta",
+                    "id": "6cabffb8-dd8f-4bc5-9753-d717e0ce0f8f",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Look",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "09df503c-eae0-418f-b9a4-300f4b5c2044",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

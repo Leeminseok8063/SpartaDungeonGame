@@ -14,7 +14,7 @@ public class CameraMovements : MonoBehaviour
 
     private void Start()
     {
-        mainPlayer = FindObjectOfType<MovementController>().transform.gameObject;
+        mainPlayer = GameManager.Instance.Player.gameObject;
         destPos = new Vector3 (posX, posY, posZ);
         transform.position = destPos;
     }
@@ -22,6 +22,5 @@ public class CameraMovements : MonoBehaviour
     void LateUpdate()
     {
         transform.position = Vector3.SmoothDamp(transform.position, mainPlayer.transform.position + destPos, ref vel, lerpScale); 
-        //transform.position = mainPlayer.transform.position + destPos;
     }
 }
