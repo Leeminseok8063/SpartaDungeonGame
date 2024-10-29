@@ -24,10 +24,10 @@ public class PlayerObject : MonoBehaviour
     public bool isDamaged = false;
     private float EnergeTimer = 0;
 
-    GameObject currentTarget;
-    GameObject currentItemObject;
-    GameObject equipItemObject;
-    MonsterObject mobTarget;
+    private GameObject currentTarget;
+    private GameObject currentItemObject;
+    private GameObject equipItemObject;
+    private MonsterObject mobTarget;
     
     public LayerMask interactMask;
     public RuntimeAnimatorController gunAnimatorController;
@@ -35,18 +35,16 @@ public class PlayerObject : MonoBehaviour
     public GameObject GunFirePosition;
     public GameObject Projectile;
 
-    Vector3 currentDir = Vector3.zero;
-    Vector3 currentCheckPoint = Vector3.zero;
+    private Vector3 currentDir = Vector3.zero;
+    private Vector3 currentCheckPoint = Vector3.zero;
     //================================
-    
 
-
+    #region UNITY EVENTS
     private void Awake()
     {
         GameManager.Instance.Player = this;
         animator = GetComponent<Animator>();
     }
-    
     void Start()
     {
         movementController = GetComponent<MovementController>();
@@ -54,7 +52,6 @@ public class PlayerObject : MonoBehaviour
         PlayerInit();
         gameInterface.UpdateGameInterface();
     }
-
     private void Update()
     {
         EnergeTimer += Time.deltaTime;
@@ -67,19 +64,101 @@ public class PlayerObject : MonoBehaviour
         {
             EnergeTimer = 0;
         }
+        
+        FrontCasting();
+        CheckInteractToItem();
     }
-
     private void FixedUpdate()
     {
         FallingCheck();
-        FrontCasting();
     }
-
-    private void LateUpdate()
+    #endregion
+    #region HELPER FUNCTIONS
+    private void PlayerInit()
     {
-        CheckInteractToItem();
+        currentCheckPoint = new Vector3(-45.2000008f, 17.6000004f, -43.9000015f);
+        maxHealth = health;
+        maxShield = shield;
+        maxEnerge = energe;
+        shield = 0;
+    }  
+    private void CheckInteractToItem()
+    {
+        if (currentItemObject == null || !movementController.isInteract) return;
+        ItemObject item = currentItemObject.GetComponent<ItemObject>();
+        switch (item.info.type)
+        {
+            case ITEMTYPE.CONSUME:
+                IncreaseHealth();
+                break;
+            case ITEMTYPE.JUMPER:
+                equipItemObject = currentItemObject;
+                movementController.BaseJumpVal = item.info.power;
+                break;
+            case ITEMTYPE.SHIELD:
+                IncreaseShield();
+                break;
+            case ITEMTYPE.CHECKPOINT:
+                currentCheckPoint = item.GetCheckPointPos();
+                break;
+            case ITEMTYPE.INTERACTABLE:
+                item.TriggerInteractItem();
+                return;
+            case ITEMTYPE.WEAPON:
+                animator.runtimeAnimatorController = gunAnimatorController;
+                GunObject.SetActive(true);
+                break;
+        }
+        //movementController.isInteract = false;
+        Destroy(currentItemObject);
+        currentItemObject = null;
     }
+    private void TeleportToCheckPoint()
+    {
+        gameObject.transform.position = currentCheckPoint;
+    }
+    private void FallingCheck()
+    {
+        if (gameObject.transform.position.y < -10)
+        {
+            StartCoroutine(DamageToPlayer());
+            TeleportToCheckPoint();
+        }
+    }
+    private void FrontCasting()
+    {
+        Vector3 box = new Vector3(2.5f, 3f, 2.5f);
+        Vector3 center = transform.position + (transform.forward * 2f) + (Vector3.up * 1f);
+        Collider[] allItems = Physics.OverlapBox(center, box / 2, Quaternion.identity, interactMask);
+        if (allItems.Length != 0)
+        {
+            foreach (Collider coll in allItems)
+            {
+                if (coll.TryGetComponent<ItemObject>(out ItemObject item))
+                {
+                    gameInterface.interactPanel.gameObject.SetActive(true);
+                    gameInterface.ItemNameText.text = item.info.itemName;
+                    gameInterface.ItemDescText.text = item.info.itemDesc;
+                    currentItemObject = item.gameObject;
+                }
+                else if (coll.TryGetComponent<MonsterObject>(out MonsterObject mob))
+                {
+                    //StartCoroutine(mob.DamageToMonster(damage));
+                    mobTarget = mob;
+                }
+            }
+        }
+        else
+        {
+            gameInterface.interactPanel.gameObject.SetActive(false);
+            currentItemObject = null;
+            mobTarget = null;
+        }
 
+        Funtions.DrawBoxCasting(box, center);
+    }
+    #endregion
+    #region PLAYER STAT CONTROLL
     public void IncreaseEnerge()
     {
         energe = Mathf.Min(maxEnerge, ++energe);
@@ -91,7 +170,7 @@ public class PlayerObject : MonoBehaviour
         gameInterface.UpdateGameInterface();
     }
     public void IncreaseHealth()
-    {      
+    {
         health = Mathf.Min(maxHealth, ++health);
         gameInterface.UpdateGameInterface();
     }
@@ -117,111 +196,21 @@ public class PlayerObject : MonoBehaviour
     public bool DecreaseEnerge()
     {
         if (energe == 0) return false;
-        
+
         energe = Mathf.Max(0, --energe);
         gameInterface.UpdateGameInterface();
         return true;
     }
+    #endregion
 
+    //CAN USE EXTERNAL
     public void MobTargetToDamage()
     {
-        if(mobTarget != null)
+        if (mobTarget != null)
         {
-           mobTarget.DamageToMonster(damage);
+            mobTarget.DamageToMonster(damage);
         }
     }
 
-    public void GetWeapon()
-    {
-        animator.runtimeAnimatorController = gunAnimatorController;
-        GunObject.SetActive(true);
-    }
 
-    private void PlayerInit()
-    {
-        currentCheckPoint = new Vector3(-45.2000008f, 17.6000004f, -43.9000015f); //¤¾¤¾..
-        maxHealth = health;
-        maxShield = shield;
-        maxEnerge = energe;
-        shield = 0;
-    }
-
-    private void FrontCasting()
-    {
-        Vector3 box = new Vector3(2.5f, 3f, 2.5f);
-        Vector3 center = transform.position + (transform.forward * 2f) + (Vector3.up * 1f);
-        Collider[] allItems = Physics.OverlapBox(center, box / 2, Quaternion.identity, interactMask);
-        if(allItems.Length != 0)
-        {
-            foreach(Collider coll in allItems)
-            {
-                if (coll.TryGetComponent<ItemObject>(out ItemObject item))
-                {
-                    gameInterface.interactPanel.gameObject.SetActive(true);
-                    gameInterface.ItemNameText.text = item.info.itemName;
-                    gameInterface.ItemDescText.text = item.info.itemDesc;
-                    currentItemObject = item.gameObject;
-                }
-                else if(coll.TryGetComponent<MonsterObject>(out MonsterObject mob))
-                {
-                    //StartCoroutine(mob.DamageToMonster(damage));
-                    mobTarget = mob;
-                }
-            }         
-        }
-        else
-        {
-            gameInterface.interactPanel.gameObject.SetActive(false);
-            currentItemObject = null;
-            mobTarget = null;
-        }
-
-        Funtions.DrawBoxCasting(box, center);
-    }
-
-    private void CheckInteractToItem()
-    {
-        if (currentItemObject == null || !movementController.isInteract) return;
-        ItemObject item = currentItemObject.GetComponent<ItemObject>();
-        switch(item.info.type)
-        {
-            case ITEMTYPE.CONSUME:
-                IncreaseHealth();
-                break;
-            case ITEMTYPE.JUMPER:
-                equipItemObject = currentItemObject;
-                movementController.BaseJumpVal = item.info.power;
-                break;
-            case ITEMTYPE.SHIELD:
-                IncreaseShield();
-                break;
-            case ITEMTYPE.CHECKPOINT:
-                currentCheckPoint = item.GetCheckPointPos();
-                break;
-            case ITEMTYPE.INTERACTABLE:
-                item.TriggerInteractItem();
-                return;
-            case ITEMTYPE.WEAPON:
-                GetWeapon();
-                break;
-        }
-        //movementController.isInteract = false;
-        Destroy(currentItemObject);
-        currentItemObject = null;
-    }
-
-    private void TeleportToCheckPoint()
-    {
-        gameObject.transform.position = currentCheckPoint;
-    }
-
-    private void FallingCheck()
-    {
-        if(gameObject.transform.position.y < -10)
-        {
-            StartCoroutine(DamageToPlayer());
-            TeleportToCheckPoint();
-        }     
-    }
-    
 }

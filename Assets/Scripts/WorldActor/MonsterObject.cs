@@ -36,74 +36,90 @@ public class MonsterObject : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
     }
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         state = MOBSTATE.IDLE;
         targetPlayer = GameManager.Instance.Player;
     }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (state == MOBSTATE.DEATH)
-        {
-            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-            if (stateInfo.IsName("MonsterArmature|Death") && stateInfo.normalizedTime >= 1f)
-            {
-                Destroy(this.gameObject);
-                return;
-            }
-            return;
-        }
-
         switch (state)
         {
             case MOBSTATE.IDLE:
-                localTimer += Time.deltaTime;
-                navMeshAgent.isStopped = true;
-                isMove = false;
-                if((targetPlayer.transform.position - transform.position).magnitude < detectDist) 
-                {
-                    localTimer = 0;
-                    state = MOBSTATE.ATTACK;
-                    isMove = true;
-                    break;
-                }              
-                else if (localTimer > calculDelay)
-                {
-                    localTimer = 0;
-                    CalculatePath();
-                    state = MOBSTATE.MOVE;
-                    isMove = true;
-                }
+                IdleStateUpdate();
                 break;
             case MOBSTATE.MOVE:
-                PathWorking();
+                MoveStateUpdate();
                 break;
             case MOBSTATE.ATTACK:
-                if ((targetPlayer.transform.position - transform.position).magnitude > detectDist * 2)
-                {
-                    state = MOBSTATE.IDLE;
-                    break;
-                }
-                
-                if ((targetPlayer.transform.position - transform.position).magnitude < 2f && !isAttack)
-                {
-                    StartCoroutine(OrderAttack());
-                }
-                else
-                {
-                    CalculateTargetPath();
-                }
+                AttackStateUpdate();
                 break;
+            case MOBSTATE.DEATH:
+                DeathStateUpdate();
+                return;
         }
         
         AnimUpdate();
     }
 
-    void CalculatePath()
+    private void IdleStateUpdate()
+    {
+        localTimer += Time.deltaTime;
+        navMeshAgent.isStopped = true;
+        isMove = false;
+        if ((targetPlayer.transform.position - transform.position).magnitude < detectDist)
+        {
+            localTimer = 0;
+            state = MOBSTATE.ATTACK;
+            isMove = true;
+        }
+        else if (localTimer > calculDelay)
+        {
+            localTimer = 0;
+            CalculatePath();
+            state = MOBSTATE.MOVE;
+            isMove = true;
+        }
+    }
+    private void MoveStateUpdate()
+    {
+        if ((dist - transform.position).magnitude < 0.1f)
+        {
+            state = MOBSTATE.IDLE;
+            navMeshAgent.isStopped = true;
+        }
+    }
+    private void AttackStateUpdate()
+    {
+        if ((targetPlayer.transform.position - transform.position).magnitude > detectDist * 2)
+        {
+            state = MOBSTATE.IDLE;
+            return;
+        }
+        else if ((targetPlayer.transform.position - transform.position).magnitude < 2f && !isAttack)
+        {
+            StartCoroutine(AttackToPlayer());
+        }
+        else
+        {
+            CalculateTargetPath();
+        }
+    }
+    private void DeathStateUpdate()
+    {
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        if (stateInfo.IsName("MonsterArmature|Death") && stateInfo.normalizedTime >= 1f)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+    }
+    private void AnimUpdate()
+    {
+        animator.SetBool("isMove", isMove);
+    }
+
+    private void CalculatePath()
     {      
         navMeshAgent.isStopped = false;
         NavMeshHit hit;
@@ -111,14 +127,13 @@ public class MonsterObject : MonoBehaviour
         navMeshAgent.SetDestination(hit.position);  
         dist = hit.position;
     }
-
-    void CalculateTargetPath()
+    private void CalculateTargetPath()
     {
         navMeshAgent.isStopped = false;
         navMeshAgent.SetDestination(targetPlayer.transform.position);
     }
-
-    IEnumerator OrderAttack()
+    
+    private IEnumerator AttackToPlayer()
     {
         isAttack = true;
         navMeshAgent.isStopped = true;
@@ -134,22 +149,7 @@ public class MonsterObject : MonoBehaviour
         yield return new WaitForSeconds(1f);
         isAttack = false;
 
-    }
-
-    void PathWorking()
-    {
-        if((dist - transform.position).magnitude < 0.1f)
-        {
-            state = MOBSTATE.IDLE;
-            navMeshAgent.isStopped = true;
-        }
-    }
-   
-    void AnimUpdate()
-    {
-        animator.SetBool("isMove", isMove);
-    }
-
+    } 
     public void DamageToMonster(int damage)
     {
         if(!(state == MOBSTATE.DEATH))
@@ -164,11 +164,6 @@ public class MonsterObject : MonoBehaviour
                 animator.SetTrigger("isDeath");
 
             }
-            /*if (health == 0)
-            {
-                yield return new WaitForSeconds(2f);
-                Destroy(this.gameObject);
-            }*/
         }
         
     }

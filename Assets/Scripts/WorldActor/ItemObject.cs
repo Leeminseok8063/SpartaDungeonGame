@@ -17,9 +17,9 @@ public class ItemObject : MonoBehaviour
 
         return new Vector3();
     }
-
     public void TriggerInteractItem()
     {
-        animator.SetBool("isInteract", true);
+        if (info.type == ITEMTYPE.INTERACTABLE)
+            animator.SetBool("isInteract", true);
     }
 }

@@ -71,8 +71,8 @@ MonoBehaviour:
   type: 2
   speed: 0
   power: 30
-  delay: 3
-  startPos: {x: 4.11, y: 1.87, z: -43.55}
+  delay: 2
+  startPos: {x: 4.1100006, y: 4.65, z: -43.550003}
   destPos: {x: 0, y: 0, z: 0}
 --- !u!95 &2937813929382611063
 Animator:
@@ -143,9 +143,33 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7652874837742840886, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: -3497141644481962776, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 343883470885415863, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
       propertyPath: m_Name
       value: Bouncer
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3266199201183354185, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8455154897094625141, guid: 9c88fb05f712e4147b44e1c217400952, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

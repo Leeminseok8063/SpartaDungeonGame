@@ -15,5 +15,5 @@ MonoBehaviour:
   itemPrefab: {fileID: 0}
   type: 1
   itemName: "[\uC7A5\uBE44]\uC0C1\uC2B9\uC758 \uBD80\uC801"
-  itemDesc: "\uC810\uD504\uB825\uC744 \uB300\uD3ED \uC0C1\uC2B9 \uC2DC\uCF1C\uC900\uB2E4."
-  power: 30
+  itemDesc: "\uC810\uD504\uB825\uC744 \uB300\uD3ED \uC0C1\uC2B9 \uC2DC\uCF1C\uC90D\uB2C8\uB2E4."
+  power: 25

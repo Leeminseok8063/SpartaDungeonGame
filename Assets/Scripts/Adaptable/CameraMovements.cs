@@ -4,11 +4,12 @@ using UnityEngine;
 
 public class CameraMovements : MonoBehaviour
 {
-    public GameObject mainPlayer;
     public float posX;
     public float posY;
     public float posZ;
     public float lerpScale;
+    
+    private GameObject mainPlayer;
     private Vector3 destPos;
     private Vector3 vel = Vector3.zero;
 

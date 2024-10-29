@@ -11,8 +11,6 @@ enum PLATTYPE
 
 public class PlatformMachine : MonoBehaviour
 {
-
-    bool ObjectOnPanel = false;
     [Header("MOD")][SerializeField]PLATTYPE type = PLATTYPE.NONE;
     BoxCollider collider;
     Rigidbody rb;
@@ -31,14 +29,12 @@ public class PlatformMachine : MonoBehaviour
 
     private float forceModeTimer = 0f;
 
-    private void Start()
+    private void Awake()
     {
         collider = GetComponent<BoxCollider>();
+        animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
         transform.position = startPos;
-
-        if(type == PLATTYPE.FORCE)
-            animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -69,14 +65,10 @@ public class PlatformMachine : MonoBehaviour
         foreach(RaycastHit hit in hits )
         {
             objects.Add(hit.collider.gameObject);
-        }
-        
-        // 박스의 모서리를 계산
-        Vector3[] corners = new Vector3[8];
-        Vector3 halfBoxSize = boxSize / 2;
+        }     
         Funtions.DrawBoxCasting(boxSize, boxCenter);
         return objects;
-    }
+    } 
     void ForceModeUpdate()
     {
         List<GameObject> objects = FindObjectOnPanel();
@@ -98,8 +90,7 @@ public class PlatformMachine : MonoBehaviour
 
         forceModeTimer += Time.deltaTime;
         objects.Clear();
-    }
-    
+    }    
     void MoveModeUpdate()
     {
         List<GameObject> objects = FindObjectOnPanel();

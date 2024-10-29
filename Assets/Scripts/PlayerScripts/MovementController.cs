@@ -10,6 +10,7 @@ public class MovementController : MonoBehaviour, IOnPlatformable
     [SerializeField] private float maxSpeedVal;
     [SerializeField] private float IncreaseAcceleration;
 
+    //PP
     public float BaseJumpVal
     {
         set { baseJumpVal = value; }
@@ -32,31 +33,30 @@ public class MovementController : MonoBehaviour, IOnPlatformable
     public bool isInteract = false;
     public bool isAttack = false;
 
+    #region UNITY EVENTS
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
         player = GetComponent<PlayerObject>();
     }
-
     private void Update()
     {
         GroundCasting();
     }
-
     private void FixedUpdate()
     {
         Movement();
     }
-
     private void LateUpdate()
     {
         UpdatePlayerAnim();
     }
-
+    #endregion
+    #region BEHAVIOR FUNTIONS
     private void Movement()
     {
-        if(!isAttack && !player.isDamaged)
+        if (!isAttack && !player.isDamaged)
         {
             movementVector = (Vector3.forward * movementInput.y + Vector3.right * movementInput.x) * (baseSpeedVal + acceleration);
             rb.velocity = new Vector3(movementVector.x, rb.velocity.y, movementVector.z);
@@ -71,20 +71,19 @@ public class MovementController : MonoBehaviour, IOnPlatformable
             {
                 acceleration = 0f;
             }
-        }      
+        }
     }
-
     private void Jumping()
     {
-        if(isGround && !isAttack && !player.isDamaged) rb.AddForce(Vector3.up * baseJumpVal, ForceMode.Impulse);
+        if (isGround && !isAttack && !player.isDamaged) rb.AddForce(Vector3.up * baseJumpVal, ForceMode.Impulse);
     }
     private IEnumerator Attacking()
     {
         if (!isAttack && player.DecreaseEnerge())
         {
-            if(player.GunObject.activeSelf)
+            if (player.GunObject.activeSelf)
             {
-                
+
                 GameObject projectile = Instantiate(player.Projectile, player.GunFirePosition.transform.position, Quaternion.identity);
                 projectile.GetComponent<Rigidbody>().AddForce(transform.forward * 30f, ForceMode.Impulse);
             }
@@ -92,23 +91,23 @@ public class MovementController : MonoBehaviour, IOnPlatformable
             {
                 player.MobTargetToDamage();
             }
-            
+
             isAttack = true;
             animator.SetTrigger("isAttack");
             yield return new WaitForSeconds(1f);
             isAttack = false;
         }
-        
-        
     }
-
+    #endregion
+    #region ANIMATION
     private void UpdatePlayerAnim()
     {
         animator.SetBool("isMove", movementVector != Vector3.zero ? true : false);
         animator.SetBool("isRunning", acceleration > maxSpeedVal * 0.3f);
         animator.SetBool("isJump", !isGround);
     }
-
+    #endregion
+    #region INPUT FILED
     public void OnMove(InputAction.CallbackContext context)
     {
         movementInput = (context.phase != InputActionPhase.Performed ? Vector2.zero : context.ReadValue<Vector2>());      
@@ -129,7 +128,9 @@ public class MovementController : MonoBehaviour, IOnPlatformable
         if (movementVector != Vector3.zero || !isGround) return;
         if(context.phase == InputActionPhase.Started) StartCoroutine(Attacking());
     }
+    #endregion 
 
+    //CAN USE EXTERNAL
     public void GroundCasting()
     {
         Vector3 boxSize = new Vector3(1f, 0.1f, 1f);
@@ -138,19 +139,9 @@ public class MovementController : MonoBehaviour, IOnPlatformable
         isGround = Physics.BoxCast(boxCenter, boxSize / 2, Vector3.down, out RaycastHit hitInfo, Quaternion.identity, groundDist, LayerMask.GetMask("Ground"));
         Funtions.DrawBoxCasting(boxSize, boxCenter);
     }
-
-    public bool IsControll()
-    {
-        if(movementInput == Vector2.zero) return false;
-        return true;
-    }
     public Rigidbody GetRigidbody()
     {
         return rb;
-    }
-    public Vector3 GetMoveDir()
-    {
-        return movementVector;
     }
     public void PlatformPos(Vector3 pos)
     {
